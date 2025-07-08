@@ -1,13 +1,8 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, inject } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet-polylinedecorator';
-
-interface RoutePoint {
-  number: number;
-  lat: number;
-  lng: number;
-  altitude?: number;
-}
+import { RouteStorageService, RoutePoint } from './route-storage.service';
+import { Subject, BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-map',
@@ -20,10 +15,15 @@ export class MapComponent implements AfterViewInit, OnInit {
   private line!: L.Polyline;
   private decorator!: any;
 
-  points: RoutePoint[] = [];
+  private readonly storage = inject(RouteStorageService);
+  private readonly routeChanged$ = new Subject<RoutePoint[]>();
+
+  points$ = new BehaviorSubject<RoutePoint[]>([]);
   pointCounter = 1;
   selectedPoint: RoutePoint | null = null;
   modalPosition: { left: number; top: number } | null = null;
+  showFinalModal = false;
+  isSent = false;
 
   ngAfterViewInit(): void {
     this.map = L.map('map').setView([50.45, 30.52], 13);
@@ -38,44 +38,45 @@ export class MapComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    const saved = localStorage.getItem('route-points');
-    if (saved) {
-      try {
-        this.points = JSON.parse(saved);
-        this.renumberPoints();
-      } catch (e) {
-        this.points = [];
-      }
-    }
-
-    if (this.points.length > 0) {
+    const loaded = this.storage.load();
+    this.points$.next(loaded);
+    this.renumberPoints();
+    if (loaded.length > 0) {
       setTimeout(() => this.renderRoute(), 0);
     }
+    this.routeChanged$.subscribe(points => {
+      this.renumberPoints();
+      this.renderRoute();
+      this.saveToLocalStorage();
+      this.cancelEdit();
+    });
   }
 
-  private saveToLocalStorage() {
-    localStorage.setItem('route-points', JSON.stringify(this.points));
+  private get points(): RoutePoint[] {
+    return this.points$.getValue();
+  }
+
+  private set points(val: RoutePoint[]) {
+    this.points$.next(val);
   }
 
   addPoint(lat: number, lng: number) {
-    this.points.push({ number: this.pointCounter++, lat, lng });
-    this.renumberPoints();
-    this.renderRoute();
-    this.saveToLocalStorage();
-    this.cancelEdit();
+    const newPoints = [...this.points, { number: this.pointCounter++, lat, lng }];
+    this.points$.next(newPoints);
+    this.routeChanged$.next(newPoints);
   }
 
   deletePoint(index: number) {
-    this.points.splice(index, 1);
-    this.renumberPoints();
-    this.renderRoute();
-    this.saveToLocalStorage();
-    this.cancelEdit();
+    const newPoints = this.points.filter((_, i) => i !== index);
+    this.points$.next(newPoints);
+    this.routeChanged$.next(newPoints);
   }
 
   renumberPoints() {
-    this.points.forEach((p, i) => p.number = i + 1);
-    this.pointCounter = this.points.length + 1;
+    const pts = this.points;
+    pts.forEach((p, i) => p.number = i + 1);
+    this.pointCounter = pts.length + 1;
+    this.points$.next(pts);
   }
 
   renderRoute() {
@@ -93,9 +94,10 @@ export class MapComponent implements AfterViewInit, OnInit {
         .bindTooltip(`${point.number}`, { permanent: true, direction: 'top' })
         .on('dragend', (event: any) => {
           const latlng = event.target.getLatLng();
-          this.points[index].lat = latlng.lat;
-          this.points[index].lng = latlng.lng;
-          this.renderRoute();
+          const updated = [...this.points];
+          updated[index] = { ...updated[index], lat: latlng.lat, lng: latlng.lng };
+          this.points$.next(updated);
+          this.routeChanged$.next(updated);
         })
         .on('click', (event: any) => {
           this.selectedPoint = { ...this.points[index] };
@@ -130,10 +132,10 @@ export class MapComponent implements AfterViewInit, OnInit {
     if (this.selectedPoint) {
       const index = this.points.findIndex(p => p.number === this.selectedPoint!.number);
       if (index > -1) {
-        this.points[index] = { ...this.selectedPoint };
-        this.renderRoute();
-        this.cancelEdit();
-        this.saveToLocalStorage();
+        const updated = [...this.points];
+        updated[index] = { ...this.selectedPoint };
+        this.points$.next(updated);
+        this.routeChanged$.next(updated);
       }
     }
   }
@@ -143,14 +145,36 @@ export class MapComponent implements AfterViewInit, OnInit {
     this.modalPosition = null;
   }
 
-  sendToServer() {
+  openFinalModal() {
+    this.showFinalModal = true;
+    this.isSent = false;
+  }
+
+  closeFinalModal() {
+    this.showFinalModal = false;
+    this.isSent = false;
+  }
+
+  confirmSend() {
     const payload = this.points.map(p => ({
       number: p.number,
       lat: p.lat,
       lng: p.lng,
       altitude: p.altitude || 0
     }));
-    console.log('Faik Send to server:', payload);
-   
+    console.log('Fake Send to server:', payload);
+    this.isSent = true;
+    this.points$.next([]);
+    this.routeChanged$.next([]);
+    this.storage.save([]);
+    this.pointCounter = 1;
+  }
+
+  sendToServer() {
+    this.openFinalModal();
+  }
+
+  private saveToLocalStorage() {
+    this.storage.save(this.points);
   }
 }

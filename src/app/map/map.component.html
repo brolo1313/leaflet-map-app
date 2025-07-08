@@ -21,6 +21,37 @@
   </div>
 </div>
 
-<div *ngIf="points.length > 1" class="footer">
-  <button (click)="sendToServer()">📤 Відправити маршрут</button>
+<div *ngIf="showFinalModal" class="final-modal-overlay">
+  <div class="final-modal">
+    <h2 *ngIf="!isSent">Остаточний маршрут</h2>
+    <table *ngIf="!isSent" class="final-table">
+      <thead>
+        <tr>
+          <th>№</th>
+          <th>Широта</th>
+          <th>Довгота</th>
+          <th>Висота</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="points$ | async as points">
+        <tr *ngFor="let p of points">
+          <td>{{ p.number }}</td>
+          <td>{{ p.lat }}</td>
+          <td>{{ p.lng }}</td>
+          <td>{{ p.altitude !== undefined ? p.altitude : 0 }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="final-actions">
+      <button *ngIf="!isSent" (click)="confirmSend()">📤 Відправити</button>
+      <span *ngIf="isSent" class="sent-msg">✅ Маршрут відправлено!</span>
+      <button (click)="closeFinalModal()">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(points$ | async) as points">
+  <div *ngIf="points.length > 1" class="footer">
+    <button (click)="sendToServer()">📤 Відправити маршрут</button>
+  </div>
 </div>
