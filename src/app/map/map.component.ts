@@ -38,10 +38,21 @@ export class MapComponent implements AfterViewInit {
 
   addPoint(lat: number, lng: number) {
     this.points.push({ number: this.pointCounter++, lat, lng });
+    this.renumberPoints();
     this.renderRoute();
   }
 
- 
+  deletePoint(index: number) {
+    this.points.splice(index, 1);
+    this.renumberPoints();
+    this.renderRoute();
+  }
+
+  renumberPoints() {
+    this.points.forEach((p, i) => p.number = i + 1);
+    this.pointCounter = this.points.length + 1;
+  }
+
   renderRoute() {
     this.markers.forEach(m => m.remove());
     this.line?.remove();
@@ -85,6 +96,20 @@ export class MapComponent implements AfterViewInit {
     }
   }
 
+  savePoint() {
+    if (this.selectedPoint) {
+      const index = this.points.findIndex(p => p.number === this.selectedPoint!.number);
+      if (index > -1) {
+        this.points[index] = { ...this.selectedPoint };
+        this.renderRoute();
+        this.selectedPoint = null;
+      }
+    }
+  }
+
+  cancelEdit() {
+    this.selectedPoint = null;
+  }
 
   sendToServer() {
     const payload = this.points.map(p => ({
