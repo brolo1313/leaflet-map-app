@@ -1,27 +1,93 @@
-# LeafletMapApp
+# Leaflet Map App
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.11.
+## Опис
 
-## Development server
+Це Angular 15 додаток для побудови та редагування маршрутів на карті з використанням Leaflet та плагінів. Користувач може додавати, переміщати, видаляти точки маршруту, редагувати їх параметри (широта, довгота, висота), а також відправляти маршрут на сервер (імітація). Всі зміни зберігаються у localStorage, що дозволяє зберігати маршрут між сесіями.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Основний стек
+- **Angular 15** (Standalone компоненти, Signals, RxJS)
+- **TypeScript** (строга типізація, інтерфейси)
+- **Leaflet** (карта, маркери, лінії, PolylineDecorator для стрілок)
+- **SCSS** (адаптивний сучасний дизайн)
+- **RxJS** (реактивне управління станом)
 
-## Code scaffolding
+## Основні можливості
+- Додавання, переміщення, видалення точок маршруту на карті
+- Редагування параметрів точки (широта, довгота, висота)
+- Відображення маршруту з напрямком руху (стрілки)
+- Збереження маршруту у localStorage (через SOLID-сервіс)
+- Відновлення маршруту після перезавантаження сторінки
+- Відправка маршруту (імітація) з фінальним підтвердженням
+- Сучасний UI/UX, підказки, модальні вікна
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Запуск проекту
 
-## Build
+1. **Встановіть залежності:**
+   ```bash
+   npm install
+   ```
+2. **Запустіть додаток:**
+   ```bash
+   npm start
+   ```
+3. **Відкрийте у браузері:**
+   ```
+   http://localhost:4200
+   ```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Архітектура та Best Practices
 
-## Running unit tests
+- **SOLID:**
+  - Вся логіка збереження маршруту винесена у RouteStorageService (Single Responsibility).
+  - Компонент працює лише з UI та реактивним станом.
+- **RxJS:**
+  - Для стану точок використовується BehaviorSubject, всі зміни через next().
+  - В шаблоні використовується async pipe для реактивного рендеру.
+- **TypeScript:**
+  - Всі дані строго типізовані через інтерфейси (RoutePoint).
+  - Відсутність any, використання nullish coalescing, optional chaining.
+- **Angular:**
+  - Standalone компоненти, DI через inject, сучасний підхід до сервісів.
+  - Всі файли у kebab-case, чітка структура (component, service, scss).
+  - Дотримання Angular Style Guide.
+- **UI/UX:**
+  - Сучасний дизайн, адаптивність, підказки, модальні вікна.
+  - Доступність: фокус, aria, підказки для полів.
+- **Leaflet:**
+  - Підключення стилів через styles.scss.
+  - PolylineDecorator для стрілок напрямку.
+- **Захист:**
+  - Всі дані користувача зберігаються лише локально (localStorage).
+  - Відсутність XSS, не використовується innerHTML.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Структура проекту
 
-## Running end-to-end tests
+```
+leaflet-map-app/
+  ├── src/
+  │   ├── app/
+  │   │   ├── map/
+  │   │   │   ├── map.component.ts
+  │   │   │   ├── map.component.html
+  │   │   │   ├── map.component.scss
+  │   │   │   └── route-storage.service.ts
+  │   │   └── app.module.ts
+  │   └── styles.scss
+  ├── package.json
+  └── README.md
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Рекомендації для розробників
+- Додавайте нові сервіси для окремих відповідальностей (наприклад, для API, аналітики тощо).
+- Для складних форм використовуйте Angular Reactive Forms.
+- Для складних сценаріїв стану використовуйте signals або state management (ngrx, ngxs).
+- Додавайте unit-тести для сервісів та компонентів (Arrange-Act-Assert).
+- Дотримуйтесь Angular Style Guide та принципів чистого коду.
 
-## Further help
+## Контакти
+- Автор: [Ваше ім'я]
+- Email: [ваш email]
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+---
+
+**Успішної роботи з проєктом!**
