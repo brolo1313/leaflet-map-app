@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet-polylinedecorator';
 
@@ -14,7 +14,7 @@ interface RoutePoint {
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss']
 })
-export class MapComponent implements AfterViewInit {
+export class MapComponent implements AfterViewInit, OnInit {
   private map!: L.Map;
   private markers: L.Marker[] = [];
   private line!: L.Polyline;
@@ -23,6 +23,7 @@ export class MapComponent implements AfterViewInit {
   points: RoutePoint[] = [];
   pointCounter = 1;
   selectedPoint: RoutePoint | null = null;
+  modalPosition: { left: number; top: number } | null = null;
 
   ngAfterViewInit(): void {
     this.map = L.map('map').setView([50.45, 30.52], 13);
@@ -36,16 +37,40 @@ export class MapComponent implements AfterViewInit {
     });
   }
 
+  ngOnInit(): void {
+    const saved = localStorage.getItem('route-points');
+    if (saved) {
+      try {
+        this.points = JSON.parse(saved);
+        this.renumberPoints();
+      } catch (e) {
+        this.points = [];
+      }
+    }
+
+    if (this.points.length > 0) {
+      setTimeout(() => this.renderRoute(), 0);
+    }
+  }
+
+  private saveToLocalStorage() {
+    localStorage.setItem('route-points', JSON.stringify(this.points));
+  }
+
   addPoint(lat: number, lng: number) {
     this.points.push({ number: this.pointCounter++, lat, lng });
     this.renumberPoints();
     this.renderRoute();
+    this.saveToLocalStorage();
+    this.cancelEdit();
   }
 
   deletePoint(index: number) {
     this.points.splice(index, 1);
     this.renumberPoints();
     this.renderRoute();
+    this.saveToLocalStorage();
+    this.cancelEdit();
   }
 
   renumberPoints() {
@@ -72,8 +97,13 @@ export class MapComponent implements AfterViewInit {
           this.points[index].lng = latlng.lng;
           this.renderRoute();
         })
-        .on('click', () => {
+        .on('click', (event: any) => {
           this.selectedPoint = { ...this.points[index] };
+          const containerPoint = this.map.latLngToContainerPoint([point.lat, point.lng]);
+          this.modalPosition = {
+            left: containerPoint.x,
+            top: containerPoint.y
+          };
         });
       return marker;
     });
@@ -102,13 +132,15 @@ export class MapComponent implements AfterViewInit {
       if (index > -1) {
         this.points[index] = { ...this.selectedPoint };
         this.renderRoute();
-        this.selectedPoint = null;
+        this.cancelEdit();
+        this.saveToLocalStorage();
       }
     }
   }
 
   cancelEdit() {
     this.selectedPoint = null;
+    this.modalPosition = null;
   }
 
   sendToServer() {

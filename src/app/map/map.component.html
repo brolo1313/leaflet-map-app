@@ -1,11 +1,14 @@
 <div id="map" style="height: 100vh; width: 100%;"></div>
 <p class="hint">🟢 Натисни на карту, щоб додати точку. 🟠 Натисни на маркер, щоб редагувати. 🔴 Видалити можна в редакторі.</p>
 
-<div *ngIf="selectedPoint" class="modal">
+<div *ngIf="selectedPoint && modalPosition" class="modal" [ngStyle]="{ left: modalPosition.left + 'px', top: modalPosition.top + 'px', position: 'absolute' }">
   <h3>Редагувати точку №{{ selectedPoint.number }}</h3>
-  <label>Широта: <input type="number" [(ngModel)]="selectedPoint.lat"></label>
-  <label>Довгота: <input type="number" [(ngModel)]="selectedPoint.lng"></label>
-  <label>Висота: <input type="number" [(ngModel)]="selectedPoint.altitude"></label>
+  <div class="modal-content">
+    <label>Широта: <input type="number" [(ngModel)]="selectedPoint.lat"></label>
+    <label>Довгота: <input type="number" [(ngModel)]="selectedPoint.lng"></label>
+    <label>Висота: <input type="number" [(ngModel)]="selectedPoint.altitude"></label>
+  </div>
+ 
   <div class="modal-actions">
     <button (click)="savePoint()">💾 Зберегти</button>
     <button (click)="cancelEdit()">❌ Скасувати</button>
@@ -13,6 +16,6 @@
   </div>
 </div>
 
-<div class="footer">
+<div *ngIf="points.length > 1" class="footer">
   <button (click)="sendToServer()">📤 Відправити маршрут</button>
 </div>
