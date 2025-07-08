@@ -1,29 +1,112 @@
 .modal {
-  min-width: 220px;
+  min-width: 240px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-  padding: 16px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  padding: 22px 26px 18px 26px;
   z-index: 1000;
   transform: translate(-50%, -100%);
   pointer-events: auto;
+  font-size: 16px;
 
-  .modal-content{
+  h3 {
+    font-size: 20px;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .modal-content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
 
-    label{
+    label {
       display: flex;
+      align-items: center;
+      font-size: 15px;
+      gap: 8px;
+
+      input[type='number'] {
+        font-size: 15px;
+        padding: 4px 8px;
+        border-radius: 5px;
+        border: 1px solid #bbb;
+        margin-left: 6px;
+      }
+    }
+  }
+
+  .modal-content label input[type='number'] {
+    font-size: 15px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+    margin-left: 6px;
+  }
+
+  /* Для широти та довготи — ширина 180px */
+  .modal-content label:nth-child(1) input[type='number'],
+  .modal-content label:nth-child(2) input[type='number'] {
+    width: 180px;
+  }
+
+  /* Для висоти — фіксована ширина 100px */
+  .modal-content label:nth-child(3) input[type='number'] {
+    width: 100px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+
+    button {
+      font-size: 15px;
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: none;
+      background: #e3eafc;
+      color: #1a237e;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: 500;
+    }
+    button:hover {
+      background: #c5cae9;
     }
   }
 }
 
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
+.info-hint {
+  display: inline-block;
+  position: relative;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 16px;
+
+  .hint-text {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 120%;
+    transform: translateX(-50%);
+    background: #222;
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1200;
+    opacity: 0.97;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+
+  &:hover .hint-text,
+  &:focus .hint-text {
+    display: block;
+  }
 }
 
 .hint {
@@ -32,10 +115,11 @@
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255,255,255,0.95);
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 16px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 17px;
   z-index: 900;
+  font-weight: 500;
 }
 
 .footer {
@@ -44,4 +128,18 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 900;
+  button {
+    font-size: 16px;
+    padding: 8px 22px;
+    border-radius: 7px;
+    border: none;
+    background: #e3eafc;
+    color: #1a237e;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #c5cae9;
+  }
 }

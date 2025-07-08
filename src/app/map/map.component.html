@@ -6,7 +6,12 @@
   <div class="modal-content">
     <label>Широта: <input type="number" [(ngModel)]="selectedPoint.lat"></label>
     <label>Довгота: <input type="number" [(ngModel)]="selectedPoint.lng"></label>
-    <label>Висота: <input type="number" [(ngModel)]="selectedPoint.altitude"></label>
+    <label>Висота: <input type="number" [(ngModel)]="selectedPoint.altitude">
+  <span class="info-hint" tabindex="0">
+    ℹ️
+    <span class="hint-text">Висота над рівнем моря в метрах</span>
+  </span>
+</label>
   </div>
  
   <div class="modal-actions">
